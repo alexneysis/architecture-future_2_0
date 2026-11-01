@@ -1,10 +1,11 @@
-name      = "future-dev"
-zone      = "ru-central1-e"
-cores     = 2
-memory    = 2
-disk_size = 20
-nat       = true
+environment = "dev"
+region      = "us-east-1"
+cores       = 2
+memory      = 1
+disk_size   = 10
+vpc_cidr    = "10.10.0.0/16"
+subnet_cidr = "10.10.1.0/24"
 
-image_id  = "fd8iej0ml2kuiu1tq40u"
-subnet_id = "e9brao8ti3emi80k2gh4"
-ssh_key   = "REPLACE_WITH_PUBLIC_SSH_KEY"
+# Read the public key locally; never put a private key in Terraform.
+ssh_key_path = "~/.ssh/id_ed25519.pub"
+public_ip    = true

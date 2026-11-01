@@ -1,74 +1,63 @@
 variable "name" {
-  description = "Имя виртуальной машины"
-  type        = string
-}
-
-variable "zone" {
-  description = "Зона доступности; должна совпадать с зоной подсети"
+  description = "VM name and prefix for related resources"
   type        = string
 }
 
 variable "cores" {
-  description = "Количество vCPU"
+  description = "Number of vCPUs; supported pairs are documented in README"
   type        = number
-
-  validation {
-    condition     = var.cores >= 2 && floor(var.cores) == var.cores
-    error_message = "Количество vCPU должно быть целым числом не меньше 2."
-  }
 }
 
 variable "memory" {
-  description = "Объем RAM в ГБ"
+  description = "RAM in GiB"
   type        = number
-}
-
-variable "image_id" {
-  description = "ID образа операционной системы"
-  type        = string
-}
-
-variable "boot_disk_size" {
-  description = "Размер загрузочного диска в ГБ"
-  type        = number
-  default     = 20
 }
 
 variable "disk_size" {
-  description = "Размер дополнительного диска в ГБ"
+  description = "Additional EBS volume size in GiB"
   type        = number
-}
-
-variable "disk_type" {
-  description = "Тип загрузочного и дополнительного дисков"
-  type        = string
-  default     = "network-hdd"
+  validation {
+    condition     = var.disk_size >= 1 && floor(var.disk_size) == var.disk_size
+    error_message = "disk_size must be a positive integer."
+  }
 }
 
 variable "subnet_id" {
-  description = "ID существующей подсети"
+  description = "Existing subnet ID; determines the VPC and availability zone"
   type        = string
 }
 
 variable "ssh_key" {
-  description = "Содержимое публичного SSH-ключа"
+  description = "Contents of the public SSH key; never the private key"
   type        = string
 }
 
-variable "ssh_user" {
-  description = "Пользователь для SSH; должен поддерживаться образом ОС"
+variable "ssh_cidr" {
+  description = "IPv4 CIDR allowed to connect over SSH, usually your IP/32"
   type        = string
-  default     = "ubuntu"
+  validation {
+    condition     = can(cidrnetmask(var.ssh_cidr))
+    error_message = "ssh_cidr must be a valid IPv4 CIDR."
+  }
 }
 
-variable "platform_id" {
-  description = "Аппаратная платформа ВМ"
+variable "image_id" {
+  description = "AMI ID in the provider region; must support x86_64 and T3"
   type        = string
-  default     = "standard-v3"
 }
 
-variable "nat" {
-  description = "Назначить ВМ публичный IP"
+variable "boot_disk_size" {
+  description = "Root EBS volume size in GiB; must meet the AMI minimum"
+  type        = number
+  default     = 8
+  validation {
+    condition     = var.boot_disk_size >= 8 && floor(var.boot_disk_size) == var.boot_disk_size
+    error_message = "boot_disk_size must be an integer of at least 8 GiB."
+  }
+}
+
+variable "public_ip" {
+  description = "Assign a public IPv4; requires a public subnet for internet access"
   type        = bool
-  default     = false
+  default     = true
 }

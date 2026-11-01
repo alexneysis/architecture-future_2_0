@@ -1,74 +1,58 @@
-variable "name" {
-  description = "Имя виртуальной машины"
+variable "region" {
+  description = "AWS region"
   type        = string
+  default     = "us-east-1"
 }
 
-variable "zone" {
-  description = "Зона доступности; должна совпадать с зоной подсети"
+variable "environment" {
+  description = "Environment label: dev, stage or prod"
   type        = string
 }
 
 variable "cores" {
-  description = "Количество vCPU"
+  description = "Number of vCPUs"
   type        = number
-
-  validation {
-    condition     = var.cores >= 2 && floor(var.cores) == var.cores
-    error_message = "Количество vCPU должно быть целым числом не меньше 2."
-  }
 }
 
 variable "memory" {
-  description = "Объем RAM в ГБ"
+  description = "RAM in GiB"
   type        = number
-}
-
-variable "image_id" {
-  description = "ID образа операционной системы"
-  type        = string
-}
-
-variable "boot_disk_size" {
-  description = "Размер загрузочного диска в ГБ"
-  type        = number
-  default     = 20
 }
 
 variable "disk_size" {
-  description = "Размер дополнительного диска в ГБ"
+  description = "Additional EBS disk size in GiB"
   type        = number
 }
 
-variable "disk_type" {
-  description = "Тип загрузочного и дополнительного дисков"
-  type        = string
-  default     = "network-hdd"
+variable "boot_disk_size" {
+  description = "Root EBS disk size in GiB"
+  type        = number
+  default     = 8
 }
 
-variable "subnet_id" {
-  description = "ID существующей подсети"
-  type        = string
-}
-
-variable "ssh_key" {
-  description = "Содержимое публичного SSH-ключа"
+variable "vpc_cidr" {
+  description = "VPC IPv4 network"
   type        = string
 }
 
-variable "ssh_user" {
-  description = "Пользователь для SSH; должен поддерживаться образом ОС"
+variable "subnet_cidr" {
+  description = "Subnet IPv4 network inside vpc_cidr"
   type        = string
-  default     = "ubuntu"
 }
 
-variable "platform_id" {
-  description = "Аппаратная платформа ВМ"
+variable "ssh_key_path" {
+  description = "Local public SSH key path; contents are passed to the module"
   type        = string
-  default     = "standard-v3"
+  default     = "~/.ssh/id_ed25519.pub"
 }
 
-variable "nat" {
-  description = "Назначить ВМ публичный IP"
+variable "ssh_cidr" {
+  description = "Public IPv4/CIDR allowed to SSH; set via TF_VAR_ssh_cidr"
+  type        = string
+}
+
+variable "public_ip" {
+  description = "Assign a public IPv4 to the VM"
   type        = bool
-  default     = false
+  default     = true
 }

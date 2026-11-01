@@ -1,10 +1,10 @@
-name      = "future-prod"
-zone      = "ru-central1-e"
-cores     = 8
-memory    = 16
-disk_size = 100
-nat       = false
-
-image_id  = "REPLACE_WITH_IMAGE_ID"
-subnet_id = "REPLACE_WITH_PROD_SUBNET_ID"
-ssh_key   = "REPLACE_WITH_PUBLIC_SSH_KEY"
+environment    = "prod"
+region         = "us-east-1"
+cores          = 1
+memory         = 1
+boot_disk_size = 16
+disk_size      = 30
+vpc_cidr       = "10.30.0.0/16"
+subnet_cidr    = "10.30.1.0/24"
+ssh_key_path   = "~/.ssh/id_ed25519.pub"
+public_ip      = true
