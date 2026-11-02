@@ -72,9 +72,3 @@ variable "aws_account_id" {
     error_message = "AWS Account ID должен содержать ровно 12 цифр."
   }
 }
-
-variable "ssh_key_path" {
-  description = "Путь к публичному SSH-ключу"
-  type        = string
-  default     = "~/.ssh/id_ed25519.pub"
-}
