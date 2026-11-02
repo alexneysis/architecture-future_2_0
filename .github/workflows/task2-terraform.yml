@@ -83,6 +83,25 @@ jobs:
           printf '%s\n' "$SSH_PUBLIC_KEY" > "$RUNNER_TEMP/training.pub"
           echo "TF_VAR_ssh_key_path=$RUNNER_TEMP/training.pub" >> "$GITHUB_ENV"
 
+      - name: Diagnose SSH key path
+        run: |
+          echo "Commit: $GITHUB_SHA"
+          echo "Directory: $PWD"
+          echo "Environment path: ${TF_VAR_ssh_key_path:-NOT_SET}"
+      
+          test -n "${TF_VAR_ssh_key_path:-}"
+          test -s "$TF_VAR_ssh_key_path"
+      
+          terraform console -var-file="$TF_ENV.tfvars" <<'EOF'
+          var.ssh_key_path
+          EOF
+      
+          grep -RIn \
+            --include='*.tf' \
+            --include='*.tfvars' \
+            --include='*.tfvars.json' \
+            'ssh_key_path' .
+
       - name: Check formatting
         run: terraform fmt -check -recursive ../../
 
