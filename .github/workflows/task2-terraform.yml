@@ -1,0 +1,130 @@
+name: Task2 Terraform
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment
+        type: choice
+        required: true
+        default: dev
+        options:
+          - dev
+          - stage
+          - prod
+
+      operation:
+        description: Operation
+        type: choice
+        required: true
+        default: plan
+        options:
+          - plan
+          - apply
+          - destroy
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: task2-terraform-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  terraform:
+    if: github.ref == 'refs/heads/sprint-11'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    environment: terraform-training
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: Task2Advanced/envs/${{ inputs.environment }}
+
+    env:
+      AWS_REGION: us-east-1
+
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
+
+      TF_ENV: ${{ inputs.environment }}
+      TF_OPERATION: ${{ inputs.operation }}
+      TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+
+      TF_VAR_aws_account_id: ${{ vars.AWS_ACCOUNT_ID }}
+      TF_VAR_ssh_cidr: ${{ vars.SSH_CIDR }}
+
+      SSH_PUBLIC_KEY: ${{ vars.SSH_PUBLIC_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.13.4"
+
+      - name: Authenticate to AWS
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+          allowed-account-ids: ${{ vars.AWS_ACCOUNT_ID }}
+
+      - name: Prepare public SSH key
+        run: |
+          test -n "$SSH_PUBLIC_KEY"
+          printf '%s\n' "$SSH_PUBLIC_KEY" > "$RUNNER_TEMP/training.pub"
+          echo "TF_VAR_ssh_key_path=$RUNNER_TEMP/training.pub" >> "$GITHUB_ENV"
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive ../../
+
+      - name: Terraform init
+        run: |
+          terraform init -input=false \
+            -backend-config="bucket=$TF_STATE_BUCKET" \
+            -backend-config="key=task2/$TF_ENV/terraform.tfstate" \
+            -backend-config="region=$AWS_REGION" \
+            -backend-config="encrypt=true" \
+            -backend-config="use_lockfile=true" \
+            -backend-config="allowed_account_ids=[\"$TF_VAR_aws_account_id\"]"
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: |
+          if [[ "$TF_OPERATION" == "destroy" ]]; then
+            terraform plan -destroy \
+              -input=false \
+              -lock-timeout=5m \
+              -var-file="$TF_ENV.tfvars" \
+              -out=tfplan
+          else
+            terraform plan \
+              -input=false \
+              -lock-timeout=5m \
+              -var-file="$TF_ENV.tfvars" \
+              -out=tfplan
+          fi
+
+      - name: Apply saved plan
+        if: inputs.operation == 'apply' || inputs.operation == 'destroy'
+        run: terraform apply -input=false -lock-timeout=5m tfplan
+
+      - name: Terraform outputs
+        if: inputs.operation == 'apply'
+        run: terraform output
+
+      - name: Remove temporary files
+        if: always()
+        run: |
+          rm -f tfplan
+          rm -f "$RUNNER_TEMP/training.pub"
