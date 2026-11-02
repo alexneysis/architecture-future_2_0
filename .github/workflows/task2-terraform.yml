@@ -101,6 +101,10 @@ jobs:
       - name: Terraform validate
         run: terraform validate
 
+      - name: Unlock stale dev state
+        if: inputs.environment == 'dev'
+        run: terraform force-unlock -force 1d50f185-62ff-bf18-35ce-c9dbbd66c0dc
+
       - name: Terraform plan
         run: |
           if [[ "$TF_OPERATION" == "destroy" ]]; then
