@@ -1,0 +1,11 @@
+environment    = "stage"
+region         = "us-east-1"
+cores          = 2
+memory         = 2
+boot_disk_size = 8
+disk_size      = 20
+vpc_cidr       = "10.20.0.0/16"
+subnet_cidr    = "10.20.1.0/24"
+ssh_key_path   = "~/.ssh/id_ed25519.pub"
+public_ip      = true
+

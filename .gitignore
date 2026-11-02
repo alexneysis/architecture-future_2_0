@@ -6,6 +6,7 @@
 *.tfplan
 crash.log
 crash.*.log
+tfplan
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
