@@ -6,7 +6,6 @@ boot_disk_size = 16
 disk_size      = 30
 vpc_cidr       = "10.30.0.0/16"
 subnet_cidr    = "10.30.1.0/24"
-ssh_key_path   = "~/.ssh/id_ed25519.pub"
 public_ip      = true
 
 
