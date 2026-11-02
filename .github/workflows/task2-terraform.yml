@@ -98,25 +98,6 @@ jobs:
             -backend-config="use_lockfile=true" \
             -backend-config="allowed_account_ids=[\"$TF_VAR_aws_account_id\"]"
 
-      - name: Diagnose SSH key path
-        run: |
-          echo "Commit: $GITHUB_SHA"
-          echo "Directory: $PWD"
-          echo "Environment path: ${TF_VAR_ssh_key_path:-NOT_SET}"
-      
-          test -n "${TF_VAR_ssh_key_path:-}"
-          test -s "$TF_VAR_ssh_key_path"
-      
-          terraform console -var-file="$TF_ENV.tfvars" <<'EOF'
-          var.ssh_key_path
-          EOF
-      
-          grep -RIn \
-            --include='*.tf' \
-            --include='*.tfvars' \
-            --include='*.tfvars.json' \
-            'ssh_key_path' .
-
       - name: Terraform validate
         run: terraform validate
 
@@ -127,12 +108,14 @@ jobs:
               -input=false \
               -lock-timeout=5m \
               -var-file="$TF_ENV.tfvars" \
+              -var="ssh_key_path=$TF_VAR_ssh_key_path" \
               -out=tfplan
           else
             terraform plan \
               -input=false \
               -lock-timeout=5m \
               -var-file="$TF_ENV.tfvars" \
+              -var="ssh_key_path=$TF_VAR_ssh_key_path" \
               -out=tfplan
           fi
 
