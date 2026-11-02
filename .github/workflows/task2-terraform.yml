@@ -33,7 +33,7 @@ concurrency:
 
 jobs:
   terraform:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/sprint-11'
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
