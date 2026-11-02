@@ -62,3 +62,13 @@ variable "aws_profile" {
   type        = string
   default     = null
 }
+
+variable "aws_account_id" {
+  description = "ID разрешённого учебного AWS-аккаунта"
+  type        = string
+
+  validation {
+    condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
+    error_message = "AWS Account ID должен содержать ровно 12 цифр."
+  }
+}
