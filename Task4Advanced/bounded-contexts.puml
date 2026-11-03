@@ -1,0 +1,60 @@
+@startuml
+' Будущее 2.0 — целевая карта bounded contexts, горизонт 3 года
+left to right direction
+skinparam linetype ortho
+skinparam ArrowFontSize 10
+skinparam nodesep 95
+skinparam ranksep 100
+
+title Будущее 2.0 — DDD Bounded Contexts (To-Be, 3 года)
+
+package "КЛИНИКИ" {
+  component "Реестр пациентов\n[Patient Registry]" as Patients
+  component "Лечение и приёмы\n[Clinical Care]" as Care
+  component "Счета за услуги\n[Billing]" as Billing
+  component "Запасы и инвентарь\n[Inventory]" as Inventory
+}
+
+package "ИИ-КОМПАНИЯ"  {
+  component "ИИ-диагностика\n[AI Diagnostics]" as AI
+}
+
+package "ФИНТЕХ / БАНК"  {
+  component "Кредитование\n[Lending]" as Lending
+  component "Платежи\n[Payments]" as Payments
+}
+
+package "ГОЛОВНОЙ ОФИС"  {
+  component "Аналитика и отчёты\n[Analytics & Reporting]" as Analytics
+}
+
+package "НОВЫЕ НАПРАВЛЕНИЯ"  {
+  component "Заказы в фармкомпании\n[Pharmacy Orders]" as Pharmacy
+  component "Медоборудование и телеметрия\n[Medical Devices]" as Devices
+}
+
+rectangle "Kafka + Schema Registry\n<<Integration infrastructure>>" as Kafka
+rectangle "Privacy Projection\n(классификация, фильтрация, агрегация)" as Privacy
+
+Patients --> Care : PatientRegistered
+Care --> AI : RequestAIStudy\n(защищённая команда / API)
+AI --> Care : AIStudyCompleted\n(защищённое событие)
+Care --> Billing : EncounterCompleted
+Billing --> Payments : InvoiceIssued
+Lending --> Payments : CreditContractCreated
+Payments --> Billing : PaymentReceived
+Care --> Pharmacy : MedicationOrderPlaced\n(минимум разрешённых данных)
+Inventory --> Pharmacy : StockBelowThreshold
+Pharmacy --> Inventory : PharmacyOrderCreated
+Devices --> AI : DeviceTelemetryReceived\n(защищённое событие)
+
+Care ..> Privacy : ClinicalVisitsAggregated
+AI ..> Privacy : AIUsageAggregated
+Billing ..> Privacy : финансовые события
+Payments ..> Privacy : платёжные события
+Lending ..> Privacy : кредитные события
+Privacy --> Analytics : обезличенные\nаналитические проекции
+
+Kafka ..> Privacy : поток событий\nдля аналитической проекции
+
+@enduml

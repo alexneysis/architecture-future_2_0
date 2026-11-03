@@ -1,0 +1,130 @@
+@startuml
+' Аналог Event Storming: карта событий по схеме источник -> событие -> подписчики.
+left to right direction
+skinparam shadowing false
+skinparam linetype ortho
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam nodesep 28
+skinparam ranksep 38
+skinparam backgroundColor #FFFFFF
+
+title Будущее 2.0 — Event Storming (событийная карта)
+
+rectangle "Реестр пациентов\n(источник)" as S1 #D5E8D4
+rectangle "PatientRegistered" as E1 #FFCC80
+rectangle "Лечение\n(подписчик)" as T1 #DAE8FC
+S1 -right-> E1 : публикует
+E1 -right-> T1 : читает
+
+rectangle "ИИ-диагностика" as S2 #D5E8D4
+rectangle "AIStudyCompleted\n[защищённое]" as E2 #FFCC80
+rectangle "Лечение" as T2 #DAE8FC
+S2 -right-> E2
+E2 -right-> T2
+
+rectangle "Лечение" as S3 #D5E8D4
+rectangle "EncounterCompleted\n[защищённое]" as E3 #FFCC80
+rectangle "Счета за услуги" as T3 #DAE8FC
+S3 -right-> E3
+E3 -right-> T3
+
+rectangle "Счета за услуги" as S4 #D5E8D4
+rectangle "InvoiceIssued" as E4 #FFCC80
+rectangle "Платежи; Аналитика\nчерез Privacy Projection" as T4 #DAE8FC
+S4 -right-> E4
+E4 -right-> T4
+
+rectangle "Платежи" as S5 #D5E8D4
+rectangle "PaymentReceived" as E5 #FFCC80
+rectangle "Счета за услуги; Аналитика\nчерез Privacy Projection" as T5 #DAE8FC
+S5 -right-> E5
+E5 -right-> T5
+
+rectangle "Кредитование" as S6 #D5E8D4
+rectangle "CreditContractCreated" as E6 #FFCC80
+rectangle "Платежи; Аналитика\nчерез Privacy Projection" as T6 #DAE8FC
+S6 -right-> E6
+E6 -right-> T6
+
+rectangle "Лечение" as S7 #D5E8D4
+rectangle "MedicationOrderPlaced\n[защищённое]" as E7 #FFCC80
+rectangle "Заказы в фармкомпании\n(только разрешённые поля)" as T7 #DAE8FC
+S7 -right-> E7
+E7 -right-> T7
+
+rectangle "Запасы и инвентарь" as S8 #D5E8D4
+rectangle "StockBelowThreshold" as E8 #FFCC80
+rectangle "Заказы в фармкомпании" as T8 #DAE8FC
+S8 -right-> E8
+E8 -right-> T8
+
+rectangle "Фармзаказы" as S9 #D5E8D4
+rectangle "PharmacyOrderCreated" as E9 #FFCC80
+rectangle "Запасы и инвентарь" as T9 #DAE8FC
+S9 -right-> E9
+E9 -right-> T9
+
+rectangle "Медоборудование" as S10 #D5E8D4
+rectangle "DeviceTelemetryReceived\n[защищённое]" as E10 #FFCC80
+rectangle "ИИ-диагностика" as T10 #DAE8FC
+S10 -right-> E10
+E10 -right-> T10
+
+rectangle "Лечение" as S11 #D5E8D4
+rectangle "ClinicalVisitsAggregated\n[без пациента]" as E11 #FFCC80
+rectangle "Аналитика" as T11 #DAE8FC
+S11 -right-> E11
+E11 -right-> T11 : через Privacy Projection
+
+rectangle "ИИ-диагностика" as S12 #D5E8D4
+rectangle "AIUsageAggregated\n[без пациента]" as E12 #FFCC80
+rectangle "Аналитика" as T12 #DAE8FC
+S12 -right-> E12
+E12 -right-> T12 : через Privacy Projection
+
+' Выравнивание строк по трём колонкам
+S1 -[hidden]down-> S2
+S2 -[hidden]down-> S3
+S3 -[hidden]down-> S4
+S4 -[hidden]down-> S5
+S5 -[hidden]down-> S6
+S6 -[hidden]down-> S7
+S7 -[hidden]down-> S8
+S8 -[hidden]down-> S9
+S9 -[hidden]down-> S10
+S10 -[hidden]down-> S11
+S11 -[hidden]down-> S12
+E1 -[hidden]down-> E2
+E2 -[hidden]down-> E3
+E3 -[hidden]down-> E4
+E4 -[hidden]down-> E5
+E5 -[hidden]down-> E6
+E6 -[hidden]down-> E7
+E7 -[hidden]down-> E8
+E8 -[hidden]down-> E9
+E9 -[hidden]down-> E10
+E10 -[hidden]down-> E11
+E11 -[hidden]down-> E12
+T1 -[hidden]down-> T2
+T2 -[hidden]down-> T3
+T3 -[hidden]down-> T4
+T4 -[hidden]down-> T5
+T5 -[hidden]down-> T6
+T6 -[hidden]down-> T7
+T7 -[hidden]down-> T8
+T8 -[hidden]down-> T9
+T9 -[hidden]down-> T10
+T10 -[hidden]down-> T11
+T11 -[hidden]down-> T12
+
+legend bottom
+  Зелёный — контекст-источник (publisher).
+  Оранжевый — факт в прошедшем времени (domain event).
+  Голубой — контекст-подписчик (consumer).
+  Стрелки — логические publish/subscribe, фактически через Kafka.
+  Privacy Projection фильтрует финансовые события и выпускает только безопасные аналитические представления.
+  События [защищённое] не передаются в аналитику в исходном виде.
+  Медкарты, снимки и результаты исследований в события не вкладываются.
+endlegend
+@enduml
