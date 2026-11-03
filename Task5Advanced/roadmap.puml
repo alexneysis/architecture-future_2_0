@@ -1,0 +1,40 @@
+@startuml
+' Стратегический роадмап Data Mesh. Этапы относительные, без привязки к календарному году.
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam rectangle {
+  RoundCorner 12
+  BorderColor #64748B
+  FontColor #172033
+}
+skinparam ArrowColor #475569
+skinparam defaultFontName Arial
+
+title «Будущее 2.0» — Data Mesh: внедрение за 36 месяцев
+
+rectangle "0–6 мес.\n**Пилот**\n— DDD / владельцы доменов\n— Kafka, Outbox, DLQ\n— Privacy Filter\n— 1–2 data products" as P1 #DBEAFE
+rectangle "6–18 мес.\n**Масштабирование**\n— новые домены\n— self-service BI\n— потоковые витрины\n— каталог и контракты" as P2 #DCFCE7
+rectangle "18–36 мес.\n**Целевая эксплуатация**\n— вывод легаси\n— Data Mesh governance\n— регионы и новые сервисы\n— SLO и оптимизация TCO" as P3 #FEF3C7
+
+P1 --> P2 : качество + безопасность пилота
+P2 --> P3 : зрелость data products
+
+note bottom of P1
+  Data Product Owner
+  Data Engineer
+  BI-аналитик
+end note
+note bottom of P2
+  Владельцы доменов
+  Platform Team / SRE
+  Security / Compliance
+end note
+note bottom of P3
+  Операционные владельцы
+  Platform Team / SRE
+  Архитектор + Compliance
+end note
+
+footer Цель: независимые домены, событийная интеграция и аналитика без медицинских исследований
+@enduml
